@@ -26,6 +26,8 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateHMRCToken())
     app.migrations.add(CreateUserToken())
     app.migrations.add(CreateInviteCode())
+    app.migrations.add(CreateEmployeeTeams())
+    app.migrations.add(CreateEmployeeTeamMembers())
     
     try await app.autoMigrate()
     

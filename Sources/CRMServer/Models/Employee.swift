@@ -86,6 +86,9 @@ final class Employee: Model, Content, @unchecked Sendable {
     @OptionalField(key: "bank_sort_code")
     var bankSortCode: String?
     
+    @Siblings(through: EmployeeTeamMember.self, from: \.$employee, to: \.$group)
+    var groups: [EmployeeTeam]
+    
     init(id: UUID? = nil, name: String, niNumber: String? = nil, taxCode: String? = nil, salary: Double? = nil, employeeNumber: String? = nil, dateOfBirth: Date? = nil, gender: String? = nil, address: String? = nil, email: String? = nil, phone: String? = nil, employmentStartDate: Date? = nil, niCategory: String? = nil, payFrequency: String? = nil, hoursPerWeek: Double? = nil, basicRatePerHour: Double? = nil, isDirector: Bool, directorshipStartDate: Date? = nil, nicsCalculationMethod: String? = nil, pensionScheme: String? = nil, leaveAllowanceDays: Int? = nil, paymentMethod: String? = nil, bankAccount: String? = nil, bankSortCode: String? = nil) {
         self.id = id
         self.name = name
@@ -114,38 +117,16 @@ final class Employee: Model, Content, @unchecked Sendable {
     }
     
     init() {}
-}
-
-struct CreateEmployee: Migration {
-    func prepare(on database: any Database) -> EventLoopFuture<Void> {
-        database.schema("employees")
-            .id()
-            .field("name", .string, .required)
-            .field("ni_number", .string)
-            .field("tax_code", .string)
-            .field("salary", .double)
-            .field("employee_number", .string)
-            .field("date_of_birth", .date)
-            .field("gender", .string)
-            .field("address", .string)
-            .field("email", .string)
-            .field("phone", .string)
-            .field("employment_start_date", .date)
-            .field("ni_category", .string)
-            .field("pay_frequency", .string)
-            .field("hours_per_week", .double)
-            .field("basic_rate_per_hour", .double)
-            .field("is_director", .bool, .required, .sql(.default(false)))
-            .field("directorship_start_date", .date)
-            .field("nics_calculation_method", .string)
-            .field("pension_scheme", .string)
-            .field("leave_allowance_days", .int)
-            .field("payment_method", .string)
-            .field("bank_account", .string)
-            .field("bank_sort_code", .string)
-            .create()
-    }
-    func revert(on database: any Database) -> EventLoopFuture<Void> {
-        database.schema("employees").delete()
+    
+    struct Create: Content {
+        var name: String
+        var email: String
+        var isDirector: Bool?
+        
+        init(name: String, email: String, isDirector: Bool? = false) {
+            self.name = name
+            self.email = email
+            self.isDirector = isDirector
+        }
     }
 }

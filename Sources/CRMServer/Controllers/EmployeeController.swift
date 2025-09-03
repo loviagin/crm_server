@@ -11,10 +11,18 @@ import Fluent
 struct EmployeeController: RouteCollection {
     func boot(routes: any Vapor.RoutesBuilder) throws {
         let employees = routes.grouped("employees")
-        employees.get(use: index)
-        employees.post(use: create)
-        employees.get(":id", "payslips", use: payslips)
-        employees.post("payslip", use: createPayslip)
+        let protected = employees.grouped(UserToken.authenticator())
+
+        protected.get(use: index)
+        protected.post(use: create)
+        protected.get(":id", "payslips", use: payslips)
+        protected.post("payslip", use: createPayslip)
+        
+        protected.get("count", use: getEmployeeCountHandler)
+    }
+    
+    func getEmployeeCountHandler(_ req: Request) async throws -> Int {
+        return try await Employee.query(on: req.db).count()
     }
     
     // Получить всех сотрудников
@@ -24,7 +32,9 @@ struct EmployeeController: RouteCollection {
 
     // Создать сотрудника
     func create(req: Request) async throws -> Employee {
-        let employee = try req.content.decode(Employee.self)
+        let user = try req.auth.require(User.self)
+        let createEmployee = try req.content.decode(Employee.Create.self)
+        let employee = Employee(name: createEmployee.name, email: createEmployee.email, isDirector: createEmployee.isDirector ?? false)
         try await employee.save(on: req.db)
         return employee
     }
