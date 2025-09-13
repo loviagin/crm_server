@@ -19,6 +19,20 @@ struct EmployeeController: RouteCollection {
         protected.post("payslip", use: createPayslip)
         
         protected.get("count", use: getEmployeeCountHandler)
+        protected.get("jobtitles", use: getJobTitlesHandler)
+    }
+    
+    func getJobTitlesHandler(_ req: Request) async throws -> [String] {
+        _ = try req.auth.require(User.self)
+        
+        let employees = try await Employee.query(on: req.db)
+            .all()
+        
+        // Берём только jobTitle, фильтруем nil и дубли
+        let titles = employees.compactMap { $0.jobTitle }
+        let uniqueTitles = Array(Set(titles)).sorted()
+        
+        return uniqueTitles
     }
     
     func getEmployeeCountHandler(_ req: Request) async throws -> Int {

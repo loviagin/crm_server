@@ -28,6 +28,8 @@ struct EmployeeTeamsController: RouteCollection {
     }
     
     func listTeamSections(_ req: Request) async throws -> [TeamSectionDTO] {
+        _ = try req.auth.require(User.self)
+        
         let groups = try await EmployeeTeam.query(on: req.db)
             .with(\.$memberships) { $0.with(\.$employee) } // грузим pivot + сотрудника
             .all()
@@ -44,7 +46,7 @@ struct EmployeeTeamsController: RouteCollection {
                     jobTitle: emp.jobTitle,
                     isDirector: emp.isDirector,
                     joinedAt: emp.employmentStartDate,
-                    role: m.role                             
+                    role: m.role
                 )
             }
             return TeamSectionDTO(group: group, members: members)
