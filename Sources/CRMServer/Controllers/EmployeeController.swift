@@ -34,7 +34,7 @@ struct EmployeeController: RouteCollection {
     func create(req: Request) async throws -> Employee {
         let user = try req.auth.require(User.self)
         let createEmployee = try req.content.decode(Employee.Create.self)
-        let employee = Employee(name: createEmployee.name, email: createEmployee.email, isDirector: createEmployee.isDirector ?? false)
+        let employee = Employee(name: createEmployee.name, jobTitle: createEmployee.jobTitle, email: createEmployee.email, isDirector: createEmployee.isDirector ?? false)
         try await employee.save(on: req.db)
         return employee
     }

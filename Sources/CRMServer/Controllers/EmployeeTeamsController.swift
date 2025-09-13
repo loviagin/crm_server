@@ -14,11 +14,41 @@ struct EmployeeTeamsController: RouteCollection {
         
         protected.get(use: getAllHandler)
         protected.post(use: createHandler)
+        protected.get("sections", use: listTeamSections)
+        protected.get("count", use: countTeamsHandler)
         
         let team = protected.grouped(":id")
         team.get("users", use: getEmployeesHandler)
         team.post("attach", use: attachEmployee)
         team.post("detach", use: detachEmployee)
+    }
+    
+    func countTeamsHandler(_ req: Request) async throws -> Int {
+        return try await EmployeeTeam.query(on: req.db).count()
+    }
+    
+    func listTeamSections(_ req: Request) async throws -> [TeamSectionDTO] {
+        let groups = try await EmployeeTeam.query(on: req.db)
+            .with(\.$memberships) { $0.with(\.$employee) } // грузим pivot + сотрудника
+            .all()
+
+        return groups.map { group in
+            let members: [EmployeeListDTO] = group.memberships.map { m in
+                let emp = m.employee
+                return EmployeeListDTO(
+                    id: m.id!,
+                    employeeID: emp.id!,
+                    name: emp.name,
+                    email: emp.email,
+                    phone: emp.phone,
+                    jobTitle: emp.jobTitle,
+                    isDirector: emp.isDirector,
+                    joinedAt: emp.employmentStartDate,
+                    role: m.role                             
+                )
+            }
+            return TeamSectionDTO(group: group, members: members)
+        }
     }
     
     //MARK: - POST /

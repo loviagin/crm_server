@@ -13,6 +13,7 @@ struct CreateEmployee: AsyncMigration {
         try await database.schema("employees")
             .id()
             .field("name", .string, .required)
+            .field("job_title", .string, .required)
             .field("ni_number", .string)
             .field("tax_code", .string)
             .field("salary", .double)

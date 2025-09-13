@@ -21,6 +21,9 @@ final class EmployeeTeam: Model, Content, @unchecked Sendable {
     @Siblings(through: EmployeeTeamMember.self, from: \.$group, to: \.$employee)
     var employees: [Employee]
     
+    @Children(for: \EmployeeTeamMember.$group)
+    var memberships: [EmployeeTeamMember]
+    
     init(id: UUID? = nil, name: String, desc: String? = nil) {
         self.id = id
         self.name = name

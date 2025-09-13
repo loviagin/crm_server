@@ -8,7 +8,7 @@
 import Vapor
 import Fluent
 
-final class EmployeeTeamMember: Model, @unchecked Sendable {
+final class EmployeeTeamMember: Model, Content, @unchecked Sendable {
     static let schema = "employee_team_members"
 
     @ID

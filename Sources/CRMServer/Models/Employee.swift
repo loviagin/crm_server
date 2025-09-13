@@ -15,9 +15,11 @@ final class Employee: Model, Content, @unchecked Sendable {
     @ID(key: .id)
     var id: UUID?
     
-    // Старые поля (сохраняем!)
     @Field(key: "name")
     var name: String
+    
+    @Field(key: "job_title")
+    var jobTitle: String
     
     @OptionalField(key: "ni_number")
     var niNumber: String?
@@ -89,9 +91,13 @@ final class Employee: Model, Content, @unchecked Sendable {
     @Siblings(through: EmployeeTeamMember.self, from: \.$employee, to: \.$group)
     var groups: [EmployeeTeam]
     
-    init(id: UUID? = nil, name: String, niNumber: String? = nil, taxCode: String? = nil, salary: Double? = nil, employeeNumber: String? = nil, dateOfBirth: Date? = nil, gender: String? = nil, address: String? = nil, email: String? = nil, phone: String? = nil, employmentStartDate: Date? = nil, niCategory: String? = nil, payFrequency: String? = nil, hoursPerWeek: Double? = nil, basicRatePerHour: Double? = nil, isDirector: Bool, directorshipStartDate: Date? = nil, nicsCalculationMethod: String? = nil, pensionScheme: String? = nil, leaveAllowanceDays: Int? = nil, paymentMethod: String? = nil, bankAccount: String? = nil, bankSortCode: String? = nil) {
+    @Children(for: \EmployeeTeamMember.$employee)
+    var teamMemberships: [EmployeeTeamMember]
+    
+    init(id: UUID? = nil, name: String, jobTitle: String, niNumber: String? = nil, taxCode: String? = nil, salary: Double? = nil, employeeNumber: String? = nil, dateOfBirth: Date? = nil, gender: String? = nil, address: String? = nil, email: String? = nil, phone: String? = nil, employmentStartDate: Date? = nil, niCategory: String? = nil, payFrequency: String? = nil, hoursPerWeek: Double? = nil, basicRatePerHour: Double? = nil, isDirector: Bool, directorshipStartDate: Date? = nil, nicsCalculationMethod: String? = nil, pensionScheme: String? = nil, leaveAllowanceDays: Int? = nil, paymentMethod: String? = nil, bankAccount: String? = nil, bankSortCode: String? = nil) {
         self.id = id
         self.name = name
+        self.jobTitle = jobTitle
         self.niNumber = niNumber
         self.taxCode = taxCode
         self.salary = salary
@@ -121,11 +127,13 @@ final class Employee: Model, Content, @unchecked Sendable {
     struct Create: Content {
         var name: String
         var email: String
+        var jobTitle: String
         var isDirector: Bool?
         
-        init(name: String, email: String, isDirector: Bool? = false) {
+        init(name: String, email: String, jobTitle: String, isDirector: Bool? = nil) {
             self.name = name
             self.email = email
+            self.jobTitle = jobTitle
             self.isDirector = isDirector
         }
     }
